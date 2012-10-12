@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Newtonsoft.Json;
@@ -228,9 +229,22 @@ namespace appMobi.AppMobiCloudServiceExtension
             AppmobiApp cboValue = (AppmobiApp)cboAppMobiApps.SelectedItem;
 
             var request = new BReq();
-            string appName = "";
-            string releaseName = "";
-            string response = request.HttpGet("services/external/clientservices.aspx?feed=getappconfig&app=" + appName + "&pkg=QA&pw=&rel=" + releaseName + "&redirect=1");
+
+            string response = request.HttpGet("http://services.appmobi.com/external/clientservices.aspx?feed=getappconfig&app=" + cboValue.Name + "&pkg=QA&pw=&rel=" + cboValue.Release + "&redirect=1");
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(response);
+            string jsonText = JsonConvert.SerializeXmlNode(doc);
+
+            JObject json = (JObject)JsonConvert.DeserializeObject<object>(jsonText);
+
+            string bundleUrl = json["XML"]["CONFIG"]["BUNDLE"]["@base"].Value<string>();
+
+
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(bundleUrl, @"C:\temp\1.zip");
+            }
+
         }
 
     }
