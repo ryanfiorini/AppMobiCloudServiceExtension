@@ -75,3 +75,5 @@ C:\Users\Ryan\SkyDrive\Development\window8\AppMobiCloudServiceExtension\AppMobiC
 C:\Users\Ryan\SkyDrive\Development\window8\AppMobiCloudServiceExtension\AppMobiCloudServiceExtension\obj\Debug\AppMobiCloudServiceExtension.pkgdef
 C:\Users\Ryan\SkyDrive\Development\window8\AppMobiCloudServiceExtension\AppMobiCloudServiceExtension\obj\Debug\AppMobiCloudServiceExtension.latest.pkgdef
 C:\Users\Ryan\SkyDrive\Development\window8\AppMobiCloudServiceExtension\AppMobiCloudServiceExtension\obj\Debug\extension.vsixmanifest
+C:\Users\Ryan\SkyDrive\Development\window8\AppMobiCloudServiceExtension\AppMobiCloudServiceExtension\obj\Debug\AppMobiCloudServiceExtension_MarkupCompile.lref
+C:\Users\Ryan\SkyDrive\Development\window8\AppMobiCloudServiceExtension\AppMobiCloudServiceExtension\obj\Debug\GeneratedInternalTypeHelper.g.cs

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -31,6 +32,12 @@ namespace appMobi.AppMobiCloudServiceExtension
         private string userToken = "";
         private string userName = "";
         
+        private CollectionView _appMobiApps;
+        public CollectionView AppMobiApps
+        {
+            get { return _appMobiApps; }
+        }
+
         public MyControl()
         {
             InitializeComponent();
@@ -64,6 +71,33 @@ namespace appMobi.AppMobiCloudServiceExtension
                 btnWindowsLive.Visibility = System.Windows.Visibility.Hidden;
 
                 lblUserName.Content = userName;
+
+                string response = request.HttpGet("http://services.appmobi.com/external/sdkservices.aspx?cmd=getapplist&userid=" + userToken + "&rnd=95570673");
+
+                string[] jsons = response.Split('=');
+                string[] theend = jsons[1].Split(';');
+
+                json = (JObject)JsonConvert.DeserializeObject<object>(theend[0]);
+                if (json["rtn"].Value<string>().Equals("ok"))
+                {
+                    IList<AppmobiApp> appMobiApps = new List<AppmobiApp>();
+
+                    JArray results = (JArray)json.SelectToken("appmobiapps");
+                    foreach (var result in results)
+                    {
+                        AppmobiApp aa = new AppmobiApp
+                        {
+                            Name = result["name"].Value<string>(),
+                            Password = result["password"].Value<string>(),
+                            Release = result["releases"][0]["name"].Value<string>()
+                        };
+
+                        appMobiApps.Add(aa);
+                    }
+                    _appMobiApps = new CollectionView(appMobiApps);
+
+                    cboAppMobiApps.DataContext = AppMobiApps;
+                }
             }
             else
             {
@@ -187,6 +221,16 @@ namespace appMobi.AppMobiCloudServiceExtension
         private void btnUploadPackage_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void btnDownloadPackage_Click(object sender, RoutedEventArgs e)
+        {
+            AppmobiApp cboValue = (AppmobiApp)cboAppMobiApps.SelectedItem;
+
+            var request = new BReq();
+            string appName = "";
+            string releaseName = "";
+            string response = request.HttpGet("services/external/clientservices.aspx?feed=getappconfig&app=" + appName + "&pkg=QA&pw=&rel=" + releaseName + "&redirect=1");
         }
 
     }

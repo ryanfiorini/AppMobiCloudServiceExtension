@@ -126,6 +126,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppmobiApps.cs" />
     <Compile Include="BReq.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="IVisualStudioUser.cs" />
