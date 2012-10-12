@@ -38,7 +38,7 @@ namespace appMobi.AppMobiCloudServiceExtension
             grpWelcome.Visibility = System.Windows.Visibility.Hidden;
 
             txtUserName.Text = "ryanwfiorini@gmail.com";
-            txtPassword.Password = "f!or!n!6";
+            txtPassword.Password = "";
         }
 
         /*private void serviceClient_Completed(object sender, VisualStudioUserService.HelloWorldCompletedEventArgs e)
