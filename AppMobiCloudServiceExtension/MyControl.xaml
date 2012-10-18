@@ -55,6 +55,8 @@
                 </StackPanel>
 
                 <Button Content="Sign in" Click="btnSignin_Click" Height="28" x:Name="btnSignin" Margin="52,2,90,0"/>
+                <Label Content="" x:Name="lblMessage" />
+
             </StackPanel>
         </GroupBox>
         <GroupBox x:Name="grpWelcome" Visibility="Visible" Margin="0,70,0,0" BorderBrush="Transparent">

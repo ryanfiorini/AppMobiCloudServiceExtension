@@ -8,9 +8,16 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
+using System.Collections.Generic;
 
 namespace appMobi.AppMobiCloudServiceExtension
 {
+    internal class NativeMethods
+    {
+        [DllImport("Ole32.dll", EntryPoint = "CreateStreamOnHGlobal")]
+        internal static extern void CreateStreamOnHGlobal(IntPtr hGlobal, [MarshalAs(UnmanagedType.Bool)] bool deleteOnRelease, [Out] out Microsoft.VisualStudio.OLE.Interop.IStream stream);
+    }
+
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
     ///
@@ -31,6 +38,7 @@ namespace appMobi.AppMobiCloudServiceExtension
     [ProvideMenuResource("Menus.ctmenu", 1)]
     // This attribute registers a tool window exposed by this package.
     [ProvideToolWindow(typeof(MyToolWindow),Style = Microsoft.VisualStudio.Shell.VsDockStyle.Tabbed, Window = "3ae79031-e1bc-11d0-8f78-00a0c9110057")]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string)]
     [Guid(GuidList.guidAppMobiCloudServiceExtensionPkgString)]
     public sealed class AppMobiCloudServiceExtensionPackage : Package
     {
@@ -69,9 +77,28 @@ namespace appMobi.AppMobiCloudServiceExtension
         }
 
 
+        #region properties
+        /// <summary>
+        /// Add your listener to this list. They should be added in the overridden Initialize befaore calling the base.
+        /// </summary>
+        private List<SolutionListener> solutionListeners = new List<SolutionListener>();
+        protected internal IList<SolutionListener> SolutionListeners
+        {
+            get
+            {
+                return this.solutionListeners;
+            }
+        }
+        #endregion
+
         /////////////////////////////////////////////////////////////////////////////
         // Overridden Package Implementation
         #region Package Members
+
+
+        SolutionEventsListener listener = null;
+        IVsUIShellDocumentWindowMgr winmgr = null;
+        IStream comStream;
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -80,6 +107,31 @@ namespace appMobi.AppMobiCloudServiceExtension
         protected override void Initialize()
         {
             Debug.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+
+            this.solutionListeners.Add(new SolutionListenerForProjectOpen(this));
+            this.solutionListeners.Add(new SolutionListenerForProjectEvents(this));
+
+            foreach (SolutionListener solutionListener in this.solutionListeners)
+            {
+                solutionListener.Init();
+            }
+
+            listener = new SolutionEventsListener();
+
+            winmgr = Package.GetGlobalService(typeof(IVsUIShellDocumentWindowMgr)) as IVsUIShellDocumentWindowMgr;
+
+            listener.OnQueryUnloadProject += () =>
+            {
+                Debug.WriteLine("HANSELMAN: Before Unload Project!");
+                comStream = SaveDocumentWindowPositions(winmgr);
+            };
+            listener.OnAfterOpenProject += () =>
+            {
+                int hr = winmgr.ReopenDocumentWindows(comStream);
+                comStream = null;
+                Debug.WriteLine(String.Format("HANSELMAN: After Project Loaded! hr=", hr));
+            };
+
             base.Initialize();
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
@@ -116,6 +168,29 @@ namespace appMobi.AppMobiCloudServiceExtension
             }
         }
         #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            // Unadvise solution listeners.
+            try
+            {
+                if (disposing)
+                {
+                    foreach (SolutionListener solutionListener in this.solutionListeners)
+                    {
+                        solutionListener.Dispose();
+                    }
+
+                    // Dispose the UIThread singleton.
+                    UIThread.Instance.Dispose();
+                }
+            }
+            finally
+            {
+
+                base.Dispose(disposing);
+            }
+        }
 
         /// <summary>
         /// This function is the callback used to execute a command when the a menu item is clicked.
@@ -195,6 +270,38 @@ namespace appMobi.AppMobiCloudServiceExtension
                            0,
                            out result);
             }
+        }
+
+        private IStream SaveDocumentWindowPositions(IVsUIShellDocumentWindowMgr windowsMgr)
+        {
+            if (windowsMgr == null)
+            {
+                Debug.Assert(false, "IVsUIShellDocumentWindowMgr", String.Empty, 0);
+                return null;
+            }
+            IStream stream;
+            NativeMethods.CreateStreamOnHGlobal(IntPtr.Zero, true, out stream);
+            if (stream == null)
+            {
+                Debug.Assert(false, "CreateStreamOnHGlobal", String.Empty, 0);
+                return null;
+            }
+            int hr = windowsMgr.SaveDocumentWindowPositions(0, stream);
+            if (hr != VSConstants.S_OK)
+            {
+                Debug.Assert(false, "SaveDocumentWindowPositions", String.Empty, hr);
+                return null;
+            }
+
+            // Move to the beginning of the stream 
+            // In preparation for reading
+            LARGE_INTEGER l = new LARGE_INTEGER();
+            ULARGE_INTEGER[] ul = new ULARGE_INTEGER[1];
+            ul[0] = new ULARGE_INTEGER();
+            l.QuadPart = 0;
+            //Seek to the beginning of the stream
+            stream.Seek(l, 0, ul);
+            return stream;
         }
     }
 }

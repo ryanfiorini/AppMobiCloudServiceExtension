@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="appMobi.AppMobiCloudServiceExtension.MyControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             Background="{DynamicResource VsBrush.Window}"
+             Foreground="{DynamicResource VsBrush.WindowText}"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             Name="MyToolWindow">
+    <UserControl.Resources>
+        <Style x:Key="Link" TargetType="Button">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="Blue"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock TextDecorations="Underline" 
+                    Text="{TemplateBinding Content}"
+                    Background="{TemplateBinding Background}"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <TextBlock Margin="10" HorizontalAlignment="Center">appMobi Cloud Service Tool Window</TextBlock>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="10" FontWeight="Bold" FontStyle="Italic">Sign into appHub</TextBlock>
+                <TextBlock Margin="10,10,0,0" x:Name="btnGotoApphub"><Hyperlink Click="btnGotoApphub_Click">Goto appHub</Hyperlink></TextBlock>
+                <TextBlock Margin="20,10,0,0" x:Name="btnWindowsLive"><Hyperlink Click="btnWindowsLive_Click"><Run Text="Login windows live"/></Hyperlink></TextBlock>
+            </StackPanel>
+        </StackPanel>
+        <GroupBox x:Name="grpSignin" Margin="0,70,0,0" BorderBrush="Transparent" Visibility="Visible">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="5"><Run Text="Username:"/></TextBlock>
+                    <TextBox x:Name="txtUserName" Width="165" Margin="6,0,0,0" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="5"><Run Text="Password:"/></TextBlock>
+                    <PasswordBox x:Name="txtPassword" Width="165" Margin="9,0,0,0" />
+                </StackPanel>
+
+                <Button Content="Sign in" Click="btnSignin_Click" Height="28" x:Name="btnSignin" Margin="52,2,90,0"/>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox x:Name="grpWelcome" Visibility="Visible" Margin="0,70,0,0" BorderBrush="Transparent">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="5">            					
+                        <Label Content="Username:"/>
+                    </TextBlock>
+                    <TextBlock Margin="5">
+            				<Label x:Name="lblUserName" Content=""/>
+            		</TextBlock>
+                </StackPanel>
+                <Button Content="Upload Package" Click="btnUploadPackage_Click" Height="28" x:Name="btnUploadPackage" Margin="52,2,90,0"/>
+            </StackPanel>
+        </GroupBox>
+    </Grid>
+</UserControl>

@@ -1,10 +1,6 @@
-C:\Users\appMobi\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\AppMobiCloudServiceExtension.dll
-C:\Users\appMobi\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\Microsoft.Live.Controls.resources.dll
-C:\Users\appMobi\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\AppMobiCloudServiceExtension.pkgdef
-C:\Users\appMobi\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\extension.vsixmanifest
-C:\Users\appMobi\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\AppMobiCloudServiceExtension.pdb
 C:\Users\Ryan\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\AppMobiCloudServiceExtension.dll
+C:\Users\Ryan\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\Ionic.Zip.dll
+C:\Users\Ryan\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\Newtonsoft.Json.dll
 C:\Users\Ryan\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\AppMobiCloudServiceExtension.pkgdef
 C:\Users\Ryan\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\extension.vsixmanifest
 C:\Users\Ryan\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\AppMobiCloudServiceExtension.pdb
-C:\Users\Ryan\AppData\Local\Microsoft\VisualStudio\11.0Exp\Extensions\appMobi\AppMobiCloudServiceExtension\1.0\\Newtonsoft.Json.dll

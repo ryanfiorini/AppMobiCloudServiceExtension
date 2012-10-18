@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.ServiceModel;
@@ -21,6 +22,10 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Ionic.Zip;
+using Ionic.Zlib;
+using EnvDTE;
+using System.CodeDom.Compiler;
 
 namespace appMobi.AppMobiCloudServiceExtension
 {
@@ -54,6 +59,8 @@ namespace appMobi.AppMobiCloudServiceExtension
             throw new NotImplementedException();
         }*/
 
+
+        #region event handlers
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions")]
         private void btnSignin_Click(object sender, RoutedEventArgs e)
         {
@@ -102,10 +109,10 @@ namespace appMobi.AppMobiCloudServiceExtension
             }
             else
             {
+                lblMessage.Content = jObject["d"]["Message"].Value<string>();
             }
         }
 
-        #region event handlers
         private void btnGotoApphub_Click(object sender, RoutedEventArgs e)
         {
             string url ="";
@@ -122,10 +129,76 @@ namespace appMobi.AppMobiCloudServiceExtension
             LaunchWebBrowser(BrowserService, url, true);
 
         }
+
+        private void btnWindowsLive_Click(object sender, RoutedEventArgs e)
+        {
+            string url = Globals.ENDPOINT_OAUTH +
+                               Globals.ENDPOINT_PATH_AUTHORIZE +
+                               Globals.PARAM_CLIENT_ID +
+                               Globals.APP_CLIENT_ID +
+                               Globals.PARAM_SCOPE +
+                               Globals.REQUESTED_SCOPES +
+                               Globals.PARAM_RESPONSE_TYPE +
+                               Globals.PARAM_RESPONSE_TYPE_CODE +
+                               Globals.PARAM_REDIRECT_URI +
+                               Globals.APP_REDIRECT_URI;
+
+            LaunchWebBrowser(BrowserService, url, true);
+
+
+        }
+
+        private void btnUploadPackage_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnDownloadPackage_Click(object sender, RoutedEventArgs e)
+        {
+            AppmobiApp cboValue = (AppmobiApp)cboAppMobiApps.SelectedItem;
+
+            var request = new BReq();
+
+            string response = request.HttpGet("http://services.appmobi.com/external/clientservices.aspx?feed=getappconfig&app=" + cboValue.Name + "&pkg=QA&pw=&rel=" + cboValue.Release + "&redirect=1");
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(response);
+            string jsonText = JsonConvert.SerializeXmlNode(doc);
+
+            JObject json = (JObject)JsonConvert.DeserializeObject<object>(jsonText);
+
+            string bundleUrl = json["XML"]["CONFIG"]["BUNDLE"]["@base"].Value<string>() + "/" + json["XML"]["CONFIG"]["BUNDLE"]["@file"].Value<string>();
+
+            /*byte[] compressed;
+
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                using (GZipStream tinyStream = new GZipStream(outStream, CompressionMode.Compress))
+                using (MemoryStream mStream = new MemoryStream(getFileFromUrl(bundleUrl)))
+                    mStream.CopyTo(tinyStream);
+                compressed = outStream.ToArray();
+            }*/
+
+            Solution dte = new Solution();
+            string fullname = dte.FullName;
+
+
+            string curdir = Directory.GetCurrentDirectory();
+
+            using (MemoryStream mStream2 = new MemoryStream(getFileFromUrl(bundleUrl)))
+            using (ZipFile zip = ZipFile.Read(mStream2))
+            {
+                foreach (ZipEntry e1 in zip)
+                {
+                    e1.Extract("c:\\temp\\ryan", ExtractExistingFileAction.OverwriteSilently);
+                }
+            }
+
+        }
         #endregion
 
         #region service handlers
-
+        private CodeDomProvider codeDomProvider = null;
+        private ServiceProvider serviceProvider = null;
         #endregion
 
         #region Browser Handler
@@ -190,7 +263,7 @@ namespace appMobi.AppMobiCloudServiceExtension
                 {
                     // if not, launch the user's default browser by starting a new one.
                     StartInfo.FileName = launchUrl;
-                    Process.Start(StartInfo);
+                    System.Diagnostics.Process.Start(StartInfo);
                 }
             }
             catch
@@ -201,50 +274,30 @@ namespace appMobi.AppMobiCloudServiceExtension
         }
         #endregion
 
-        private void btnWindowsLive_Click(object sender, RoutedEventArgs e)
+
+        public static byte[] getFileFromUrl(string url)
         {
-            string url = Globals.ENDPOINT_OAUTH +
-                               Globals.ENDPOINT_PATH_AUTHORIZE +
-                               Globals.PARAM_CLIENT_ID +
-                               Globals.APP_CLIENT_ID +
-                               Globals.PARAM_SCOPE +
-                               Globals.REQUESTED_SCOPES +
-                               Globals.PARAM_RESPONSE_TYPE +
-                               Globals.PARAM_RESPONSE_TYPE_CODE +
-                               Globals.PARAM_REDIRECT_URI +
-                               Globals.APP_REDIRECT_URI;
+            System.Net.HttpWebRequest request = null;
+            System.Net.HttpWebResponse response = null;
+            byte[] b = null;
 
-            LaunchWebBrowser(BrowserService, url, true);
+            request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
+            response = (System.Net.HttpWebResponse)request.GetResponse();
 
-
-        }
-
-        private void btnUploadPackage_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnDownloadPackage_Click(object sender, RoutedEventArgs e)
-        {
-            AppmobiApp cboValue = (AppmobiApp)cboAppMobiApps.SelectedItem;
-
-            var request = new BReq();
-
-            string response = request.HttpGet("http://services.appmobi.com/external/clientservices.aspx?feed=getappconfig&app=" + cboValue.Name + "&pkg=QA&pw=&rel=" + cboValue.Release + "&redirect=1");
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(response);
-            string jsonText = JsonConvert.SerializeXmlNode(doc);
-
-            JObject json = (JObject)JsonConvert.DeserializeObject<object>(jsonText);
-
-            string bundleUrl = json["XML"]["CONFIG"]["BUNDLE"]["@base"].Value<string>();
-
-
-            using (var client = new WebClient())
+            if (request.HaveResponse)
             {
-                client.DownloadFile(bundleUrl, @"C:\temp\1.zip");
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Stream receiveStream = response.GetResponseStream();
+                    using (BinaryReader br = new BinaryReader(receiveStream))
+                    {
+                        b = br.ReadBytes(500000);
+                        br.Close();
+                    }
+                }
             }
 
+            return b;
         }
 
     }
