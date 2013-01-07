@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace appMobi.AppMobiCloudServiceExtension
 {
@@ -108,6 +109,7 @@ namespace appMobi.AppMobiCloudServiceExtension
         {
             Debug.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
 
+
             this.solutionListeners.Add(new SolutionListenerForProjectOpen(this));
             this.solutionListeners.Add(new SolutionListenerForProjectEvents(this));
 
@@ -122,17 +124,22 @@ namespace appMobi.AppMobiCloudServiceExtension
 
             listener.OnQueryUnloadProject += () =>
             {
-                Debug.WriteLine("HANSELMAN: Before Unload Project!");
                 comStream = SaveDocumentWindowPositions(winmgr);
             };
             listener.OnAfterOpenProject += () =>
             {
                 int hr = winmgr.ReopenDocumentWindows(comStream);
                 comStream = null;
-                Debug.WriteLine(String.Format("HANSELMAN: After Project Loaded! hr=", hr));
             };
 
             base.Initialize();
+
+            IVsTextImageUtilities svt = GetService(typeof(IVsTextImageUtilities)) as IVsTextImageUtilities;
+            if (null != svt)
+            {
+                svt.SaveTextImageToFile("newfile.c#",
+            }
+
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
@@ -152,8 +159,7 @@ namespace appMobi.AppMobiCloudServiceExtension
 
                 for (int i = PkgCmdIDList.cmdidMCItem1; i <= PkgCmdIDList.cmdidMCItem3; i++)
                 {
-                    CommandID cmdID = new
-                    CommandID(GuidList.guidAppMobiCloudServiceExtensionCmdSet, i);
+                    CommandID cmdID = new CommandID(GuidList.guidAppMobiCloudServiceExtensionCmdSet, i);
                     OleMenuCommand mc = new OleMenuCommand(new EventHandler(OnMCItemClicked), cmdID);
                     mc.BeforeQueryStatus += new EventHandler(OnMCItemQueryStatus);
                     mcs.AddCommand(mc);
@@ -187,7 +193,6 @@ namespace appMobi.AppMobiCloudServiceExtension
             }
             finally
             {
-
                 base.Dispose(disposing);
             }
         }
